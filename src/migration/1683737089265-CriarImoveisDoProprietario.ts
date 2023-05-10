@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm"
 
-export class CriarTabelaImoveisDoProprietario1683304764102 implements MigrationInterface {
+export class CriarImoveisDoProprietario1683737089265 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         queryRunner.query(

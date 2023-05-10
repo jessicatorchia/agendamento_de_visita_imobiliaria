@@ -11,7 +11,7 @@ export default class AgendamentosDB {
         id: number
 
     @Column()
-        dataHora: Date
+        data_hora: Date
 
     @Column()
         imovel_id: number

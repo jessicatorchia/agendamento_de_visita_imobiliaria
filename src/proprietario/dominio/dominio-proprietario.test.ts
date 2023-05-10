@@ -14,7 +14,6 @@ describe('Proprietario', () => {
                 nome:'Ana',
                 tel: '123',
                 email: 'ana@gmail.com',
-
             })
         })
 

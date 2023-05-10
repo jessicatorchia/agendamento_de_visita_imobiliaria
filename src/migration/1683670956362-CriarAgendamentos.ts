@@ -1,12 +1,12 @@
 import { MigrationInterface, QueryRunner } from "typeorm"
 
-export class CriarTabelaAgendamentos1683500519340 implements MigrationInterface {
+export class CriarAgendamentos1683670956362 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         queryRunner.query(
             `CREATE TABLE agendamentos(
                 id serial not null, 
-                dataHora Date not null,
+                data_hora Date not null,
                 imovel_id int not null,
                 cliente_id int not null,
                 corretor_id int not null,

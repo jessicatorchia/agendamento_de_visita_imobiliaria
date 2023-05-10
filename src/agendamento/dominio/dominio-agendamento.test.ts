@@ -12,14 +12,14 @@ describe('Agendamento', () => {
             )
             expect(agendamento).toEqual({
                 id: 1,
-                dataHora: dayjs('2023-01-05').hour(10).minute(30).second(0).millisecond(0).toDate(),
+                data_hora: dayjs('2023-01-05').hour(10).minute(30).second(0).millisecond(0).toDate(),
                 imovel_id: 1,
                 cliente_id: 3,
                 corretor_id: 2,
             })
         })
 
-        it('deve disparar um erro caso o agendamento não possua dataHora', () => {
+        it('deve disparar um erro caso o agendamento não possua data_hora', () => {
             expect.assertions(1)
             try {
                 new Agendamento(
@@ -30,7 +30,7 @@ describe('Agendamento', () => {
                     2
                 )
             } catch (error) {
-                expect(error).toEqual(new Error('Agendamento precisa de dataHora'))
+                expect(error).toEqual(new Error('Agendamento precisa de data_hora'))
             }
         })
 

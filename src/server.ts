@@ -40,6 +40,7 @@ import { getImovelProprietario } from './imoveis/rotas/get-imovel-proprietario'
 import { getImovel } from './imoveis/rotas/get-imovel'
 import { listarImovel } from './imoveis/rotas/listar-imoveis'
 import { updateImovel } from './imoveis/rotas/update-imovel'
+import { listaAgendamentoPorHorario } from './agendamento/rotas/lista-agendamento-horario'
 
 
 
@@ -74,6 +75,7 @@ export async function createServer() {
     createAgendamento(site, servicoAgendamento)
     updateAgendamento(site, servicoAgendamento)
     deletarAgendamentoCliente(site, servicoAgendamento)
+    listaAgendamentoPorHorario(site, servicoAgendamento)
 
     createCliente(site, servicoCliente)
     updateCliente(site, servicoCliente)

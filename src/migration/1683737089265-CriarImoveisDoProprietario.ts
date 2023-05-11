@@ -4,11 +4,11 @@ export class CriarImoveisDoProprietario1683737089265 implements MigrationInterfa
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         queryRunner.query(
-            `CREATE TABLE imoveisDoProprietario(
+            `CREATE TABLE imoveis_do_proprietario(
                 proprietario_id int not null, 
                 imovel_id int not null,
-                foreign key (proprietario_id) references proprietarios(id),
-                foreign key (imovel_id) references imoveis(id)
+                foreign key (proprietario_id) references proprietarios(id) ON DELETE CASCADE,
+                foreign key (imovel_id) references imoveis(id)  ON DELETE CASCADE
             )`,
         )
     }

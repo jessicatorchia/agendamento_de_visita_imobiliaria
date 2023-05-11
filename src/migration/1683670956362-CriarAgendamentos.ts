@@ -11,9 +11,9 @@ export class CriarAgendamentos1683670956362 implements MigrationInterface {
                 cliente_id int not null,
                 corretor_id int not null,
                 primary key (id),
-                foreign key (imovel_id) references imoveis(id),
-                foreign key (cliente_id) references clientes(id),
-                foreign key (corretor_id) references corretores(id)
+                foreign key (imovel_id) references imoveis(id) ON DELETE CASCADE,
+                foreign key (cliente_id) references clientes(id) ON DELETE CASCADE,
+                foreign key (corretor_id) references corretores(id) ON DELETE CASCADE
             )`,
         )
     }

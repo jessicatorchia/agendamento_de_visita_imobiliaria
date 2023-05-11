@@ -103,15 +103,15 @@ describe('ServicoImovel', () => {
             await repositorioImoveisDoProprietario.save(imoveisDoProprietarioDB)
 
             const imoveisDoProprietarioDB1 = new ImoveisDoProprietarioDB()
-            imoveisDoProprietarioDB.imovel_id = imovelDB1.id
-            imoveisDoProprietarioDB.proprietario_id = proprietarioDB.id
+            imoveisDoProprietarioDB1.imovel_id = imovelDB1.id
+            imoveisDoProprietarioDB1.proprietario_id = proprietarioDB.id
             await repositorioImoveisDoProprietario.save(imoveisDoProprietarioDB1)
 
             const res = await servicoImovel.getImoveisDoProprietario(proprietarioDB.id)
 
             expect(res).toEqual({
                 id: proprietarioDB.id,
-                nome: 'Ana1',
+                nome: 'Ana',
                 tel: '123',
                 email: 'ana@gmail.com',
                 imoveis: [{
@@ -245,7 +245,7 @@ describe('ServicoImovel', () => {
 
             const res2 = await repositorioImoveisDoProprietario.findOne({
                 where: {
-                    id: idImovel
+                    imovel_id: idImovel
                 }
             })
 
@@ -314,7 +314,7 @@ describe('ServicoImovel', () => {
 
             const res2 = await repositorioImoveisDoProprietario.findOne({
                 where: {
-                    id: imovelDB.id
+                    imovel_id: imovelDB.id
                 }
             })
 

@@ -1,14 +1,17 @@
 import { Express } from 'express'
-import { ServicoCorretor } from '../servico/corretor';
+import { ServicoImovel } from '../servico/imoveis';
 
-export const updateCorretor = (site: Express, servico: ServicoCorretor)=>{
-    site.put('/corretor/:id', async(req, res)=>{
+export const updateImovel = (site: Express, servico: ServicoImovel)=>{
+    site.put('/imovel/:id', async(req, res)=>{
         try{
             await servico.update(
                 Number(req.params.id),
-                req.body.nome,
-                req.body.tel,
-                req.body.email
+                req.body.cidade,
+                req.body.bairro,
+                req.body.endereco,
+                req.body.valor_alugel,
+                req.body.valor_venda,
+                req.body.proprietario_id
             )
             res.send()
         }catch(erro){

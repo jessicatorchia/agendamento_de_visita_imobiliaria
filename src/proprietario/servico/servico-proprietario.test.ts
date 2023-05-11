@@ -1,12 +1,6 @@
 import { AppDataSource } from "../../data-source"
-import AgendamentosDB from "../../entity/agendamentos"
-import ClientesDB from "../../entity/clientes"
-import CorretoresDB from "../../entity/corretores"
-import ImoveisDB from "../../entity/imoveis"
 import ImoveisDoProprietarioDB from "../../entity/imoveis_do_proprietario"
 import ProprietariosDB from "../../entity/proprietarios"
-import { ImoveisDoProprietario } from "../../imoveis/dominio/imoveis"
-
 import { ServicoProprietario } from "./proprietario"
 
 

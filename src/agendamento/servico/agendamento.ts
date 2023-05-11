@@ -1,8 +1,9 @@
-import { Repository } from "typeorm";
+import { And, LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
 import AgendamentosDB from "../../entity/agendamentos";
 import { ServicoImovel } from "../../imoveis/servico/imoveis";
 import { ServicoCliente } from "../../cliente/servico/cliente";
 import { ServicoCorretor } from "../../corretor/servico/corretor";
+import dayjs from "dayjs";
 
 
 interface GetAgendamentoCliente {
@@ -32,7 +33,6 @@ interface ClientesCorretoresEImovel{
 }
 
 interface GetAgendamentoHorario {
-
     data_hora: Date,
     agendamentos: ClientesCorretoresEImovel[]
 }
@@ -86,27 +86,43 @@ export class ServicoAgendamento {
         }
     }
 
-    // async listaAgendamentosPorHorario(data_hora: Date): Promise<GetAgendamentoHorario> {
-    //     const agendamentosDB = await this.repositorioAgendamento.find({
-    //         where: {
-    //             data_hora: data_hora
-    //         }
-    //     })
+    async listaAgendamentosPorHorario(data_hora: Date): Promise<GetAgendamentoHorario> {
+        const comecoDoDia = dayjs(data_hora).set('hour', 0).set('minute', 0).set('second', 0).toDate()
+        const fimDoDia = dayjs(data_hora).set('hour', 23).set('minute', 59).set('second', 59).toDate()
+        const agendamentosDB = await this.repositorioAgendamento.find({
+            where: {
+                data_hora: And(MoreThanOrEqual(comecoDoDia), LessThanOrEqual(fimDoDia))
+            }
+        })
 
-    //     if (!agendamentosDB) {
-    //         throw new Error('data_hora do agendamento não encontrado')
-    //     }
+        if (!agendamentosDB) {
+            throw new Error('data_hora do agendamento não encontrado')
+        }
 
-    //     const agendamentos: GetAgendamentoHorario[]= []
+        const resposta: GetAgendamentoHorario = {
+            data_hora: data_hora,
+            agendamentos: []
+        }
 
-    //     agendamentosDB.forEach(agendamento =>{
-    //         agendamentos.push(new GetAgendamentoHorario(agendamento.data_hora,
-    //         ))
-    //     })
+        await Promise.all(agendamentosDB.map(async agendamento => {
+            const cliente = await this.servicoCliente.get(agendamento.cliente_id)
+            const corretor = await this.servicoCorretor.get(agendamento.corretor_id)
+            const imovel = await this.servicoImovel.get(agendamento.imovel_id)
 
-
-        
-    // }
+            resposta.agendamentos.push({
+                cliente_nome: cliente.nome,
+                cliente_tel: cliente.tel,
+                corretor: corretor.nome,
+                corretor_tel: corretor.tel,
+                cidade: imovel.cidade,
+                bairro: imovel.bairro,
+                endereco: imovel.endereco,
+                valor_venda: imovel.valor_venda,
+                valor_aluguel: imovel.valor_aluguel
+            })
+        }))
+        return resposta
+    }
 
     async create(data_hora: Date, imovel_id:number ,cliente_id: number, corretor_id:number): Promise<number>{
        

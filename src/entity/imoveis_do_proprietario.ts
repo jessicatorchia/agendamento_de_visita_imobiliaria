@@ -4,7 +4,7 @@ import{
     
 } from 'typeorm'
 
-@Entity('imoveisDoProprietario')
+@Entity('imoveis_do_proprietario')
 export default class ImoveisDoProprietarioDB {
 
     @PrimaryColumn()

@@ -1,0 +1,26 @@
+<%- include('../comeco') -%>
+
+<h3>Cadastro de Cliente: </h3>
+<a href="cliente-novo">cadastrar novo cliente</a>
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Email</th>
+        <th>Ações</th>
+    </tr>
+
+<% clientes.forEach(cliente=> { %>
+    <tr>
+        <td><%=cliente.nome%></td>
+        <td><%=cliente.tel%></td>
+        <td><%=cliente.email%></td>
+        <td><a href="cliente/<%=cliente.id%>">editar</a></td>
+    </tr>
+<% }) %>
+<h3>Lista de Clientes Cadastrados: </h3>
+</table>
+<br/>
+<a href="imobiliaria-home">Voltar</a>
+
+<%- include('../fim') -%>

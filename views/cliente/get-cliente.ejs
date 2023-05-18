@@ -1,0 +1,11 @@
+<%- include('../comeco') -%>
+
+<form action="/cliente/<%= cliente.id %>" method="post">
+    <b>Nome:</b><input name="nome"  value="<%= cliente.nome %>"/><br>
+    <b>Tel:</b><input name="tel" value="<%= cliente.tel %>"/><br>
+    <b>Email:</b><input name="email" value="<%= cliente.email %>"/><br>
+
+    <button>Salvar Alterações</button>
+</form>
+
+<%- include('../fim') -%>

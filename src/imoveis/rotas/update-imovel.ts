@@ -2,7 +2,7 @@ import { Express } from 'express'
 import { ServicoImovel } from '../servico/imoveis';
 
 export const updateImovel = (site: Express, servico: ServicoImovel)=>{
-    site.put('/imovel/:id', async(req, res)=>{
+    site.post('/imovel/:id', async(req, res)=>{
         try{
             await servico.update(
                 Number(req.params.id),
@@ -13,7 +13,10 @@ export const updateImovel = (site: Express, servico: ServicoImovel)=>{
                 req.body.valor_venda,
                 req.body.proprietario_id
             )
-            res.send()
+            res.send(`imovel alterado com sucesso
+            <br/>
+            <a href="/imovel">Voltar</a>
+            `)
         }catch(erro){
             console.error(erro)
             res.status(500)

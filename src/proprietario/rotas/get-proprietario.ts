@@ -6,7 +6,16 @@ export const getProprietario = (site: Express, servico: ServicoProprietario)=>{
         try{
             const proprietario = await servico.get(Number(req.params.id))
             
-            res.send(proprietario)
+            const html = `
+            <form action="/proprietario/${proprietario.id}" method="post">
+            <b>Nome:</b><input name="nome" value=${proprietario.nome}"/><br>
+            <b>Tel:</b><input name="tel" value=${proprietario.tel}"/><br>
+            <b>Email:</b><input name="email" value=${proprietario.email}"/><br>
+
+            <button>Salvar Alterações</button>
+            </form>
+            `
+            res.send(html)
         }catch(erro){
             console.error(erro)
             res.status(500)

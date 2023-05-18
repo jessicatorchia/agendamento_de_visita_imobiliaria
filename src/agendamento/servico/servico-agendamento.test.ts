@@ -84,6 +84,33 @@ describe('ServicoAgendamento', () => {
                 valor_aluguel: 2500.00
             })
         })
+
+        it('Deve retornar um erro caso o agendamento não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.getAgendamentoCliente(99999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Agendamento não encontrado'))
+            }
+        })
     })
 
     describe('listaAgendamentoPorHorario', () => {
@@ -196,6 +223,35 @@ describe('ServicoAgendamento', () => {
                 }]
             })
         })
+
+        it('Deve retornar um erro caso o agendamento não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const data = dayjs('2000-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.listaAgendamentosPorHorario(data)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('data_hora do agendamento não encontrado'))
+            }
+        })
     })
 
     describe('create', () => {
@@ -223,7 +279,67 @@ describe('ServicoAgendamento', () => {
             await repositorioCorretor.query(`delete from corretores`)
             await repositorioImovel.query(`delete from imoveis`)
 
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
 
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const idAgendamento = await servicoAgendamento.create(
+                dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                imovelDB.id,
+                clienteDB.id,
+                corretorDB.id
+            )
+
+            const agendamento = await repositorioAgendamento.findOne({
+                where: {
+                    id: idAgendamento
+                }
+            })
+
+            expect(agendamento).toEqual({
+                id: idAgendamento,
+                data_hora: dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                imovel_id: imovelDB.id,
+                cliente_id: clienteDB.id,
+                corretor_id: corretorDB.id
+            })
+        })
+
+        it('Deve retornar um erro caso imovel esteja indisponivel para a data e hora', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
 
             const clienteDB = new ClientesDB()
             clienteDB.nome = 'Ana'
@@ -247,28 +363,246 @@ describe('ServicoAgendamento', () => {
             imovelDB.ativo = true
             await repositorioImovel.save(imovelDB)
 
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
 
-            const idAgendamento = await servicoAgendamento.create(
-                dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
-                imovelDB.id,
-                clienteDB.id,
-                corretorDB.id
-            )
-
-            const agendamento = await repositorioAgendamento.findOne({
-                where: {
-                    id: idAgendamento
-                }
-            })
-
-            expect(agendamento).toEqual({
-                id: idAgendamento,
-                data_hora: dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
-                imovel_id: imovelDB.id,
-                cliente_id: clienteDB.id,
-                corretor_id: corretorDB.id
-            })
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.create(
+                    dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel indisponvel para a data e hora'))
+            }
         })
+
+        it('Deve retornar um erro caso o corretor esteja indisponivel para a data e hora', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+    
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+    
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+    
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+    
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+    
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+    
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+    
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+    
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+    
+            const imovelDB1 = new ImoveisDB()
+            imovelDB1.cidade = 'Rio de Janeiro1'
+            imovelDB1.bairro = 'Botafogo'
+            imovelDB1.endereco = 'Rua 4, n 5'
+            imovelDB1.valor_venda = 4000000.00
+            imovelDB1.valor_aluguel = 2500.00
+            imovelDB1.ativo = true
+            await repositorioImovel.save(imovelDB)
+    
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+    
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.create(
+                    dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB1.id,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor indisponivel para a data e hora'))
+            }
+        })
+
+        it('Deve retornar um erro caso imovel não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.create(
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    9999999,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado'))
+            }
+        })
+
+        it('Deve retornar um erro caso o cliente não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.create(
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    9999999,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Cliente não encontrado'))
+            }
+        })
+
+        it('Deve retornar um erro caso corretor não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.create(
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    clienteDB.id,
+                    999999
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado'))
+            }
+        })
+
     })
 
     describe('update', () => {
@@ -295,7 +629,6 @@ describe('ServicoAgendamento', () => {
             await repositorioCliente.query(`delete from clientes`)
             await repositorioCorretor.query(`delete from corretores`)
             await repositorioImovel.query(`delete from imoveis`)
-
 
             const clienteDB = new ClientesDB()
             clienteDB.nome = 'Ana'
@@ -348,6 +681,372 @@ describe('ServicoAgendamento', () => {
                 corretor_id: corretorDB.id
             })
         })
+
+        it('Deve retornar um erro caso agendamento não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    99999,
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    9999999,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Agendamento nao encontrado'))
+            }
+        })
+
+        it('Deve retornar um erro caso imovel esteja indisponivel para a data e hora', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    agendamentoDB.id,
+                    dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel indisponvel para a data e hora'))
+            }
+        })
+
+        it('Deve retornar um erro caso corretor esteja indisponivel para a data e hora', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const imovelDB1 = new ImoveisDB()
+            imovelDB1.cidade = 'Rio de Janeiro'
+            imovelDB1.bairro = 'Botafogo'
+            imovelDB1.endereco = 'Rua 4, n 5'
+            imovelDB1.valor_venda = 4000000.00
+            imovelDB1.valor_aluguel = 2500.00
+            imovelDB1.ativo = true
+            await repositorioImovel.save(imovelDB1)
+
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    agendamentoDB.id,
+                    dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB1.id,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor indisponivel para a data e hora'))
+            }
+        })
+
+        it('Deve retornar um erro caso imovel não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    agendamentoDB.id,
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    9999999,
+                    clienteDB.id,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado'))
+            }
+        })
+
+        it('Deve retornar um erro caso o cliente não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    agendamentoDB.id,
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    99999,
+                    corretorDB.id
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Cliente não encontrado'))
+            }
+        })
+
+        it('Deve retornar um erro caso o corretor não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+            const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+            const clienteDB = new ClientesDB()
+            clienteDB.nome = 'Ana'
+            clienteDB.tel = '123'
+            clienteDB.email = 'ana@gmail.com'
+            await repositorioCliente.save(clienteDB)
+
+            const corretorDB = new CorretoresDB()
+            corretorDB.nome = 'beto'
+            corretorDB.tel = '123'
+            corretorDB.email = 'beto@gmail.com'
+            corretorDB.ativo = true
+            await repositorioCorretor.save(corretorDB)
+
+            const imovelDB = new ImoveisDB()
+            imovelDB.cidade = 'Rio de Janeiro'
+            imovelDB.bairro = 'Botafogo'
+            imovelDB.endereco = 'Rua 4, n 5'
+            imovelDB.valor_venda = 4000000.00
+            imovelDB.valor_aluguel = 2500.00
+            imovelDB.ativo = true
+            await repositorioImovel.save(imovelDB)
+
+            const agendamentoDB = new AgendamentosDB()
+            agendamentoDB.data_hora = dayjs('2023-01-05').hour(0).minute(0).second(0).millisecond(0).toDate()
+            agendamentoDB.imovel_id = imovelDB.id
+            agendamentoDB.cliente_id = clienteDB.id
+            agendamentoDB.corretor_id = corretorDB.id
+            await repositorioAgendamento.save(agendamentoDB)
+
+            expect.assertions(1)
+            try {
+                await servicoAgendamento.update(
+                    agendamentoDB.id,
+                    dayjs('2020-01-05').hour(0).minute(0).second(0).millisecond(0).toDate(),
+                    imovelDB.id,
+                    clienteDB.id,
+                    999999
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado'))
+            }
+        })
+        
     })
 
     describe('delete', () => {
@@ -409,5 +1108,32 @@ describe('ServicoAgendamento', () => {
 
             expect(res).toBeNull()
         })
+    })
+
+    it('Deve retornar um erro caso o agendamento não seja encontrado', async () => {
+        const repositorioCliente = dataSource.getRepository(ClientesDB)
+        const servicoCliente = new ServicoCliente(repositorioCliente)
+
+        const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+        const servicoCorretor = new ServicoCorretor(repositorioCorretor)
+
+        const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+
+        const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+        const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+        const repositorioImovel = dataSource.getRepository(ImoveisDB)
+        const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+        const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
+        const servicoAgendamento = new ServicoAgendamento(repositorioAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+
+        expect.assertions(1)
+        try {
+            await servicoAgendamento.deletar(99999)
+        }
+        catch (e) {
+            expect(e).toEqual(new Error('Agendamento não encontrado'))
+        }
     })
 })

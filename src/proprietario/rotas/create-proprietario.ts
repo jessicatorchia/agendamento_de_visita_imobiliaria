@@ -9,7 +9,7 @@ export const createProprietario = (site: Express, servico: ServicoProprietario)=
                 req.body.tel,
                 req.body.email
             )
-            res.send()
+            res.send('<b>proprietario</b> cadastrado com sucesso')
         }catch(erro){
             console.error(erro)
             res.status(500)

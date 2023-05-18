@@ -9,11 +9,11 @@ export const createCliente = (site: Express, servico: ServicoCliente)=>{
                 req.body.tel,
                 req.body.email
             )
-            res.send()
+            res.send('<b>cliente</b> cadastrado com sucesso')
         }catch(erro){
             console.error(erro)
             res.status(500)
             res.send(erro.message)
         }
     })
-}
+} 

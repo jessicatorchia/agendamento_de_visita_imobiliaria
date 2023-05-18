@@ -69,6 +69,20 @@ describe('ServicoProprietario', ()=>{
                 email: 'ana@gmail.com'
             })
         })
+
+        it('Deve retornar um erro caso o proprietario não seja encontrado', async () => {
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoProprietario.get(99999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Proprietario não encontrado'))
+            }
+        })
     })
 
     describe('create', ()=>{
@@ -133,6 +147,25 @@ describe('ServicoProprietario', ()=>{
                 tel:'123',
                 email: 'ana@gmail.com'
             })
+        })
+
+        it('Deve retornar um erro caso o proprietario não seja encontrado', async () => {
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoProprietario.update(
+                    99999,
+                    '',
+                    '',
+                    ''
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Proprietario não encontrado'))
+            }
         })
     })
 })

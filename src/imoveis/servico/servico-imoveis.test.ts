@@ -96,7 +96,6 @@ describe('ServicoImovel', () => {
             imovelDB1.ativo = true
             await repositorioImovel.save(imovelDB1)
 
-
             const imoveisDoProprietarioDB = new ImoveisDoProprietarioDB()
             imoveisDoProprietarioDB.imovel_id = imovelDB.id
             imoveisDoProprietarioDB.proprietario_id = proprietarioDB.id
@@ -128,6 +127,28 @@ describe('ServicoImovel', () => {
                     valor_venda: 5000000.00,
                 }]
             })
+        })
+
+        it('Deve retornar um erro caso o proprietario não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            const proprietarioDB = new ProprietariosDB()
+            proprietarioDB.nome = 'Ana'
+            proprietarioDB.tel = '123'
+            proprietarioDB.email = 'ana@gmail.com'
+            await repositorioProprietario.save(proprietarioDB)
+            
+            expect.assertions(1)
+            try {
+                await servicoImovel.getImoveisDoProprietario(proprietarioDB.id)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imoveis do proprietario não encontrado'))
+            }
         })
     })
 
@@ -161,6 +182,22 @@ describe('ServicoImovel', () => {
                 valor_venda: 4000000.00,
                 ativo: true
             })
+        })
+
+        it('Deve retornar um erro caso o imóvel não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoImovel.get(999999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado'))
+            }
         })
     })
 
@@ -208,6 +245,22 @@ describe('ServicoImovel', () => {
                 proprietario_tel: '123',
                 proprietario_email: 'ana@gmail.com'
             })
+        })
+
+        it('Deve retornar um erro caso o imóvel não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoImovel.getImovelProprietario(999999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado'))
+            }
         })
     })
 
@@ -333,6 +386,28 @@ describe('ServicoImovel', () => {
                 proprietario_id: proprietarioDB.id
             })
         })
+        it('Deve retornar um erro caso o imóvel não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoImovel.update(
+                    999999,
+                    "",
+                    '',
+                    '',
+                    123,
+                    123,
+                    1)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado'))
+            }
+        })
     })
 
     describe('ativar', () => {
@@ -373,6 +448,21 @@ describe('ServicoImovel', () => {
             })
 
         })
+        it('Deve retornar um erro caso o imóvel não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoImovel.ativar(999999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado ou ativo'))
+            }
+        })
     })
 
     describe('desativar', () => {
@@ -412,6 +502,22 @@ describe('ServicoImovel', () => {
                 ativo: false
             })
 
+        })
+
+        it('Deve retornar um erro caso o imóvel não seja encontrado', async () => {
+            const repositorioImoveisDoProprietario = dataSource.getRepository(ImoveisDoProprietarioDB)
+            const repositorioProprietario = dataSource.getRepository(ProprietariosDB)
+            const servicoProprietario = new ServicoProprietario(repositorioProprietario, repositorioImoveisDoProprietario)
+            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoImovel = new ServicoImovel(repositorioImovel, repositorioImoveisDoProprietario, servicoProprietario)
+
+            expect.assertions(1)
+            try {
+                await servicoImovel.desativar(999999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Imovel não encontrado ou inativo'))
+            }
         })
     })
 })

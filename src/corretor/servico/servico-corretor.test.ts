@@ -60,10 +60,9 @@ describe('ServicoCorretor', ()=>{
 
     describe('get', ()=>{
         it('Deve retornar um corretor', async ()=>{
-            const repositorioCliente = dataSource.getRepository(ClientesDB)
+        
             const repositorioCorretor = dataSource.getRepository(CorretoresDB)
-            const servicoCorretor = new ServicoCorretor(repositorioCorretor)
-            const repositorioImovel = dataSource.getRepository(ImoveisDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)         
             const repositorioAgendamento = dataSource.getRepository(AgendamentosDB)
 
             await repositorioAgendamento.query(`delete from agendamentos`)
@@ -85,6 +84,19 @@ describe('ServicoCorretor', ()=>{
                 email: 'ana@gmail.com',
                 ativo: true
             })
+        })
+
+        it('Deve retornar um erro caso o corretor não seja encontrado', async () => {
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)         
+
+            expect.assertions(1)
+            try {
+                await servicoCorretor.get(99999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado'))
+            }
         })
     })
 
@@ -162,6 +174,24 @@ describe('ServicoCorretor', ()=>{
                 ativo: true
             })
         })
+
+        it('Deve retornar um erro caso o corretor não seja encontrado', async () => {
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)         
+
+            expect.assertions(1)
+            try {
+                await servicoCorretor.update(
+                    99999,
+                    '',
+                    '',
+                    ''
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado'))
+            }
+        })
     })
 
     describe('ativar', ()=>{
@@ -201,6 +231,19 @@ describe('ServicoCorretor', ()=>{
                 ativo: true
             })
         })
+
+        it('Deve retornar um erro caso o corretor não seja encontrado', async () => {
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)         
+
+            expect.assertions(1)
+            try {
+                await servicoCorretor.ativar(99999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado ou ativo'))
+            }
+        })
     })
 
     describe('desativar', ()=>{
@@ -239,6 +282,19 @@ describe('ServicoCorretor', ()=>{
                 email: 'ana@gmail.com',
                 ativo: false
             })
+        })
+
+        it('Deve retornar um erro caso o corretor não seja encontrado', async () => {
+            const repositorioCorretor = dataSource.getRepository(CorretoresDB)
+            const servicoCorretor = new ServicoCorretor(repositorioCorretor)         
+
+            expect.assertions(1)
+            try {
+                await servicoCorretor.desativar(99999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Corretor não encontrado ou inativo'))
+            }
         })
     })
 })

@@ -2,7 +2,7 @@ import { Express } from 'express'
 import { ServicoCorretor } from '../servico/corretor';
 
 export const updateCorretor = (site: Express, servico: ServicoCorretor)=>{
-    site.put('/corretor/:id', async(req, res)=>{
+    site.post('/corretor/:id', async(req, res)=>{
         try{
             await servico.update(
                 Number(req.params.id),
@@ -10,7 +10,10 @@ export const updateCorretor = (site: Express, servico: ServicoCorretor)=>{
                 req.body.tel,
                 req.body.email
             )
-            res.send()
+            res.send(`corretor alterado com sucesso
+            <br/>
+            <a href="/corretor">Voltar</a>
+            `)
         }catch(erro){
             console.error(erro)
             res.status(500)

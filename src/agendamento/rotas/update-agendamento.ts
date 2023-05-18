@@ -2,7 +2,7 @@ import { ServicoAgendamento } from "../servico/agendamento";
 import { Express } from 'express'
 
 export const updateAgendamento = (site: Express, servico: ServicoAgendamento)=>{
-    site.put('/agendamento/:id', async(req, res)=>{
+    site.post('/agendamento/:id', async(req, res)=>{
         try{
             await servico.update(
                 Number(req.params.id),

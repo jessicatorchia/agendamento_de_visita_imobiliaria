@@ -96,15 +96,15 @@ export class ServicoImovel {
     async getImoveisDoProprietario(id: number): Promise<GetImoveisProprietario> {
         const proprietarioDB = await this.servicoProprietario.get(id)
 
-        if (!proprietarioDB) {
-            throw new Error('Cliente não encontrado')
-        }
-
         const imoveisDoProprietarioDB = await this.repositorioImoveisDoProprietario.find({
             where: {
                 proprietario_id: id
             }
         })
+
+        if (!imoveisDoProprietarioDB[0]) {
+            throw new Error('Imoveis do proprietario não encontrado')
+        }
 
 
         return {

@@ -10,7 +10,6 @@ import ClientesDB from './entity/clientes'
 import ImoveisDB from './entity/imoveis'
 import CorretoresDB from './entity/corretores'
 import { ServicoAgendamento } from './agendamento/servico/agendamento'
-import { create } from 'domain'
 import ProprietariosDB from './entity/proprietarios'
 import ImoveisDoProprietarioDB from './entity/imoveis_do_proprietario'
 import { ServicoProprietario } from './proprietario/servico/proprietario'
@@ -41,12 +40,25 @@ import { getImovel } from './imoveis/rotas/get-imovel'
 import { listarImovel } from './imoveis/rotas/listar-imoveis'
 import { updateImovel } from './imoveis/rotas/update-imovel'
 import { listaAgendamentoPorHorario } from './agendamento/rotas/lista-agendamento-horario'
+import { getClientePage } from './cliente/rotas/get-cliente-page'
+import { novoCliente } from './cliente/rotas/novo-cliente'
+import { novoAgendamento } from './agendamento/rotas/novo-agendamento'
+import { novoCorretor } from './corretor/rotas/novo-corretor'
+import { novoProprietario } from './proprietario/rotas/novo-proprietario'
+import { novoImovel } from './imoveis/rotas/novo-imovel'
+import { pageHome } from './pages/home'
+import { listarAgendamento } from './agendamento/rotas/listar-agendamento'
 
 
 
 export async function createServer() {
     const site = express()                      
-    site.use(bodyParser.json())    
+    // site.use(bodyParser.json())    
+    site.use(bodyParser.urlencoded({ extended: true }));
+
+    site.set('view engine', 'ejs');
+    site.set('views', './views');
+
     const port = 3000  
 
     const dataSource = await AppDataSource.initialize()
@@ -76,11 +88,14 @@ export async function createServer() {
     updateAgendamento(site, servicoAgendamento)
     deletarAgendamentoCliente(site, servicoAgendamento)
     listaAgendamentoPorHorario(site, servicoAgendamento)
+    listarAgendamento(site, servicoAgendamento)
+
 
     createCliente(site, servicoCliente)
     updateCliente(site, servicoCliente)
     listarCliente(site, servicoCliente)
     getCliente(site, servicoCliente)
+    getClientePage(site, servicoCliente)
 
     createCorretor(site, servicoCorretor)
     updateCorretor(site, servicoCorretor)
@@ -103,8 +118,13 @@ export async function createServer() {
     listarImovel(site, servicoImovel)
     updateImovel(site, servicoImovel)
 
+    novoCliente(site, servicoCliente)
+    novoAgendamento(site, servicoAgendamento, servicoImovel, servicoCliente, servicoCorretor)
+    novoCorretor(site, servicoCorretor)
+    novoProprietario(site, servicoProprietario)
+    novoImovel(site, servicoImovel, servicoProprietario)
 
-
+    pageHome(site)
 
 
     const server = site.listen(port, () =>{

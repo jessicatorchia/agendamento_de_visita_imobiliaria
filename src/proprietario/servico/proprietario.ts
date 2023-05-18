@@ -2,9 +2,6 @@ import { Repository } from "typeorm";
 import ProprietariosDB from "../../entity/proprietarios";
 import { Proprietario } from "../dominio/proprietario";
 import ImoveisDoProprietarioDB from "../../entity/imoveis_do_proprietario";
-import { ServicoImovel } from "../../imoveis/servico/imoveis";
-
-
 
 export class ServicoProprietario {
     repositorioProprietario: Repository<ProprietariosDB>
@@ -16,7 +13,6 @@ export class ServicoProprietario {
     ) {
         this.repositorioProprietario = repositorioProprietario
         this.repositorioImoveisDoProprietario = repositorioImoveisDoProprietario
-
     }
 
     async listar(): Promise<Proprietario[]> {
@@ -25,7 +21,8 @@ export class ServicoProprietario {
         const proprietarios: Proprietario[] = []
 
         proprietarioDB.forEach(proprietario => {
-            proprietarios.push(new Proprietario(proprietario.id, proprietario.nome, proprietario.tel, proprietario.email))
+            proprietarios.push(new Proprietario(proprietario.id, proprietario.nome, 
+            proprietario.tel, proprietario.email))
         })
 
         return proprietarios
@@ -38,7 +35,7 @@ export class ServicoProprietario {
             }
         })
         if (!proprietarioDB) {
-            throw new Error('Cliente não encontrado')
+            throw new Error('Proprietario não encontrado')
         }
 
         const cliente = new Proprietario(
@@ -71,7 +68,7 @@ export class ServicoProprietario {
         })
 
         if (!proprietarioDB) {
-            throw new Error('Cliente não encontrado')
+            throw new Error('Proprietario não encontrado')
         }
 
         proprietarioDB.nome = nome

@@ -52,6 +52,8 @@ describe('ServicoCliente', ()=>{
                 email: 'ana@gmail.com'
             }])
         })
+
+        
     })
 
     describe('get', ()=>{
@@ -81,6 +83,19 @@ describe('ServicoCliente', ()=>{
                 tel:'123',
                 email: 'ana@gmail.com'
             })
+        })
+
+        it('Deve retornar um erro caso cliente não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+        
+            expect.assertions(1)
+            try {
+                await servicoCliente.get(9999)
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Cliente não encontrado'))
+            }
         })
     })
 
@@ -156,6 +171,24 @@ describe('ServicoCliente', ()=>{
                 tel:'123',
                 email: 'ana@gmail.com'
             })
+        })
+
+        it('Deve retornar um erro caso cliente não seja encontrado', async () => {
+            const repositorioCliente = dataSource.getRepository(ClientesDB)
+            const servicoCliente = new ServicoCliente(repositorioCliente)
+
+            expect.assertions(1)
+            try {
+                await servicoCliente.update(
+                    9999,
+                    "",
+                    "",
+                    ""
+                )
+            }
+            catch (e) {
+                expect(e).toEqual(new Error('Cliente não encontrado'))
+            }
         })
     })
 })

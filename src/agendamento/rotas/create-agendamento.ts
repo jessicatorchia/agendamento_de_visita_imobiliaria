@@ -10,7 +10,7 @@ export const createAgendamento = (site: Express, servico: ServicoAgendamento)=>{
                 req.body.cliente_id,
                 req.body.corretor_id
             )
-            res.send()
+            res.send('<b>agendamento</b> cadastrado com sucesso')
         }catch(erro){
             console.error(erro)
             res.status(500)

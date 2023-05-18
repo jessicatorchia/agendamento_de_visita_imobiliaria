@@ -10,10 +10,10 @@ export const createImovel = (site: Express, servico: ServicoImovel)=>{
                 req.body.endereco,
                 req.body.valor_alugel,
                 req.body.valor_venda,
-                req.body.ativo,
+                req.body.ativo === 'true',
                 req.body.proprietario_id
             )
-            res.send()
+            res.send('<b>imovel</b> cadastrado com sucesso')
         }catch(erro){
             console.error(erro)
             res.status(500)
